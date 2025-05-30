@@ -3,126 +3,339 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Emoji Cone Bounce Animation</title>
+<title>Secret Message with Emoji Output</title>
 <style>
-  body {
-    margin: 0; padding: 0;
-    overflow: hidden;
-    background: #f0f4f8;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    position: relative;
-    height: 100vh;
+  :root {
+    --bg-light: #f0f4f8;
+    --bg-dark: #121212;
+    --color-light: #333;
+    --color-dark: #eee;
+    --primary-light: #3498db;
+    --primary-dark: #2980b9;
   }
-  #container {
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--bg-light);
+    color: var(--color-light);
+    margin: 0; padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    transition: background-color 0.3s, color 0.3s;
     position: relative;
+    overflow: hidden;
+  }
+  body.dark {
+    background: var(--bg-dark);
+    color: var(--color-dark);
+  }
+  .container {
+    background: white;
+    max-width: 520px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+    position: relative;
+    z-index: 10;
+  }
+  body.dark .container {
+    background: #1e1e1e;
+    color: var(--color-dark);
+    box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+  }
+  h2 {
+    margin-bottom: 20px;
+  }
+  label {
+    display: block;
+    margin: 12px 0 6px;
+    font-weight: 600;
+    text-align: left;
+  }
+  textarea, input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1.5px solid #ccc;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+  }
+  body.dark textarea, body.dark input[type="password"] {
+    background: #333;
+    color: var(--color-dark);
+    border-color: #555;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+  }
+  textarea:focus, input[type="password"]:focus {
+    border-color: var(--primary-light);
+    outline: none;
+  }
+  button {
+    background-color: var(--primary-light);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    margin: 10px 8px 20px 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+    user-select: none;
+  }
+  button:hover {
+    background-color: var(--primary-dark);
+  }
+  #output {
+    background-color: #ecf0f1;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 80px;
+    font-size: 1.3rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    color: #2c3e50;
+    user-select: all;
+    margin-top: 10px;
+  }
+  body.dark #output {
+    background-color: #2c2c2c;
+    color: var(--color-dark);
+  }
+  .footer {
+    margin-top: 30px;
+    font-size: 0.9rem;
+    color: #555;
+    user-select: none;
+  }
+  body.dark .footer {
+    color: #aaa;
+  }
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--primary-light);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    user-select: none;
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+  }
+  .theme-toggle:hover {
+    background-color: var(--primary-dark);
+  }
+  /* Emoji background container */
+  #emoji-background {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
+    pointer-events: none;
     overflow: hidden;
-    background: #f0f4f8;
+    z-index: 1;
   }
-  .emoji {
+  .emoji-ball {
     position: absolute;
-    font-size: 28px;
+    font-size: 24px;
     user-select: none;
-    will-change: transform, left, top;
+    will-change: transform;
+    animation-name: bounce;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
   }
 </style>
 </head>
 <body>
-  <div id="container"></div>
+  <div id="emoji-background"></div>
 
-<script>
-  const container = document.getElementById('container');
+  <div class="theme-toggle" id="themeToggle" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle Light/Dark Theme">🌙 Dark Mode</div>
 
-  // Emoji set
-  const emojis = ["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊"];
+  <div class="container" role="main" aria-label="Secret message encryptor with emoji output">
+    <h2>Secret Message</h2>
 
-  const totalEmojis = 15;
+    <label for="message">Message (type or paste here):</label>
+    <textarea id="message" placeholder="Type your message here..."></textarea>
 
-  // Cone parameters (triangle area)
-  // Apex at top center, base at bottom full width
-  // y from 0 to container height, x from center expanding outward as y increases
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const apexX = width / 2;
-  const apexY = 0;
+    <label for="password">Password:</label>
+    <input type="password" id="password" placeholder="Enter password" />
 
-  // Emoji objects with properties: element, progress (0 to 1), direction (1 or -1)
-  let emojiObjs = [];
+    <div>
+      <button id="encryptBtn">Encrypt 🔒</button>
+      <button id="decryptBtn">Decrypt 🔓</button>
+      <button id="copyBtn">Copy Output 📋</button>
+    </div>
 
-  // Create emoji elements and initialize
-  for (let i = 0; i < totalEmojis; i++) {
-    const span = document.createElement('span');
-    span.className = 'emoji';
-    span.textContent = emojis[i % emojis.length];
-    container.appendChild(span);
+    <div id="output" aria-live="polite" role="region" tabindex="0"></div>
 
-    // Start progress staggered so emojis spread along path
-    const startProgress = i / totalEmojis * 0.7; // 0 to 0.7 spread on downward path
+    <div class="footer">Crafted with ❤️ by Gopinath</div>
+  </div>
 
-    emojiObjs.push({
-      el: span,
-      progress: startProgress,
-      direction: 1, // 1 = going down cone, -1 = going back up
-      bounceOffset: 0,
-      bounceSpeed: 0.005 + Math.random() * 0.007,
-      bounceHeight: 15 + Math.random() * 10,
-      delay: i * 100 // delay to stagger bounce
-    });
-  }
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
-  function coneX(progress, y) {
-    // Given progress (0 to 1) and y, calculate x inside cone triangle
-    // At apex (y=0), x = apexX
-    // At base (y=height), max horizontal offset from apexX = maxOffset
-    const maxOffset = width / 2 * (y / height);
-    // progress along horizontal axis -0.5 to 0.5 (centered)
-    let horizontalProgress = progress - 0.5;
-    return apexX + horizontalProgress * maxOffset * 2; // multiply by 2 because range -0.5 to 0.5
-  }
+  <script>
+    // Emoji set for background animation
+    const bgEmojis = ["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😋","😎","😍","😘","😗","😙"];
 
-  function update() {
-    emojiObjs.forEach((emoji, idx) => {
-      // Update progress by direction
-      emoji.progress += 0.002 * emoji.direction;
+    const emojiSet = [
+      "😀","😁","😂","🤣","😃","😄","😅","😆",
+      "😉","😊","😋","😎","😍","😘","😗","😙",
+      "😚","🙂","🤗","🤔","😐","😑","😶","🙄",
+      "😏","😣","😥","😮","🤐","😯","😪","😫",
+      "😴","😌","😛","😜","😝","🤤","😒","😓",
+      "😔","😕","🙃","🤑","😲","☹️","🙁","😖",
+      "😞","😟","😤","😢","😭","😦","😧","😨",
+      "😩","🤯","😬","😰","😱","🥵","🥶","😳"
+    ];
 
-      if (emoji.progress > 1) {
-        emoji.progress = 1;
-        emoji.direction = -1; // reverse direction
-      } else if (emoji.progress < 0) {
-        emoji.progress = 0;
-        emoji.direction = 1;
+    const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    function base64ToEmoji(base64Str) {
+      let result = "";
+      for (let ch of base64Str) {
+        if (ch === "=") continue;
+        const idx = base64Chars.indexOf(ch);
+        if (idx === -1) continue;
+        result += emojiSet[idx];
+      }
+      return result;
+    }
+
+    function emojiToBase64(emojiStr) {
+      let result = "";
+      for (let ch of emojiStr) {
+        const idx = emojiSet.indexOf(ch);
+        if (idx === -1) continue;
+        result += base64Chars.charAt(idx);
+      }
+      while (result.length % 4 !== 0) result += "=";
+      return result;
+    }
+
+    function encryptMessage() {
+      const msg = document.getElementById('message').value;
+      const pwd = document.getElementById('password').value;
+      const output = document.getElementById('output');
+
+      if (!msg) {
+        alert('Please enter a message.');
+        return;
+      }
+      if (!pwd) {
+        alert('Please enter a password.');
+        return;
       }
 
-      // Calculate y from progress (0 top, 1 bottom)
-      const y = emoji.progress * height;
+      try {
+        const encrypted = CryptoJS.AES.encrypt(msg, pwd).toString();
+        const emojiEncoded = base64ToEmoji(encrypted);
+        output.textContent = emojiEncoded;
+      } catch {
+        alert('Encryption failed.');
+        output.textContent = "";
+      }
+    }
 
-      // Calculate x inside cone, spread horizontally
-      const x = coneX(emoji.progress, y);
+    function decryptMessage() {
+      const emojiEncrypted = document.getElementById('message').value;
+      const pwd = document.getElementById('password').value;
+      const output = document.getElementById('output');
 
-      // Bounce effect near bottom-right corner (x ~ width, y ~ height)
-      // Let's make bounce start when emoji is near right corner area (x > width*0.75 && y > height*0.8)
-      let bounce = 0;
-      if (emoji.progress > 0.8) {
-        bounce = Math.sin((performance.now() * 0.01 + emoji.delay) * 3) * emoji.bounceHeight;
+      if (!emojiEncrypted) {
+        alert('Please enter the encrypted emoji message.');
+        return;
+      }
+      if (!pwd) {
+        alert('Please enter a password.');
+        return;
       }
 
-      // Set position with bounce offset vertically
-      emoji.el.style.left = `${x}px`;
-      emoji.el.style.top = `${y + bounce}px`;
+      try {
+        const base64Str = emojiToBase64(emojiEncrypted);
+        const bytes = CryptoJS.AES.decrypt(base64Str, pwd);
+        const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+        if (!decrypted) {
+          alert('Incorrect password or corrupted message.');
+          output.textContent = "";
+        } else {
+          output.textContent = decrypted;
+        }
+      } catch {
+        alert('Decryption failed.');
+        output.textContent = "";
+      }
+    }
+
+    document.getElementById('encryptBtn').addEventListener('click', encryptMessage);
+    document.getElementById('decryptBtn').addEventListener('click', decryptMessage);
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const outputEl = document.getElementById('output');
+      if (!outputEl.textContent) return alert('Nothing to copy!');
+      navigator.clipboard.writeText(outputEl.textContent)
+        .then(() => alert('Output copied to clipboard!'))
+        .catch(() => alert('Clipboard copy failed'));
     });
 
-    requestAnimationFrame(update);
-  }
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      themeToggle.setAttribute('aria-pressed', isDark);
+      themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
 
-  update();
+    // Background emoji animation logic
+    const emojiBgContainer = document.getElementById('emoji-background');
+    const emojiCount = 25;
+    const emojis = [];
 
-  // Resize handler
-  window.addEventListener('resize', () => {
-    // Update width and height on resize
-    width = window.innerWidth;
-    height = window.innerHeight;
-  });
-</script>
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function createEmojiBall(index) {
+      const span = document.createElement('span');
+      span.classList.add('emoji-ball');
+      span.style.fontSize = randomBetween(18, 28) + "px";
+      span.textContent = bgEmojis[index % bgEmojis.length];
+      span.style.left = randomBetween(0, window.innerWidth - 30) + "px";
+      span.style.top = randomBetween(0, window.innerHeight - 30) + "px";
+      span.style.animationDuration = randomBetween(3, 7) + "s";
+      span.style.animationDelay = randomBetween(0, 5) + "s";
+      emojiBgContainer.appendChild(span);
+      return span;
+    }
+
+    for(let i = 0; i < emojiCount; i++) {
+      emojis.push(createEmojiBall(i));
+    }
+
+    // Adjust emojis on resize
+    window.addEventListener('resize', () => {
+      emojis.forEach(span => {
+        span.style.left = randomBetween(0, window.innerWidth - 30) + "px";
+        span.style.top = randomBetween(0, window.innerHeight - 30) + "px";
+      });
+    });
+  </script>
 </body>
 </html>
