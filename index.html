@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Secret Message with Bouncing Emoji Background</title>
 <style>
+  /* ... (poora pehle wala CSS same rahega) ... */
   :root {
     --bg-light: #f0f4f8;
     --bg-dark: #121212;
@@ -274,12 +275,34 @@
 
     document.getElementById('encryptBtn').addEventListener('click', encryptMessage);
     document.getElementById('decryptBtn').addEventListener('click', decryptMessage);
+
+    // Improved copy function with temporary textarea
     document.getElementById('copyBtn').addEventListener('click', () => {
       const outputEl = document.getElementById('output');
-      if (!outputEl.textContent) return alert('Nothing to copy!');
-      navigator.clipboard.writeText(outputEl.textContent)
-        .then(() => alert('Output copied to clipboard!'))
-        .catch(() => alert('Clipboard copy failed'));
+      const textToCopy = outputEl.textContent;
+      if (!textToCopy) {
+        alert('Nothing to copy!');
+        return;
+      }
+
+      const tempTextArea = document.createElement('textarea');
+      tempTextArea.value = textToCopy;
+      document.body.appendChild(tempTextArea);
+      tempTextArea.select();
+      tempTextArea.setSelectionRange(0, 99999); // For mobile devices
+
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          alert('Output copied to clipboard!');
+        } else {
+          alert('Copy failed, please try manually.');
+        }
+      } catch (err) {
+        alert('Copy failed, please try manually.');
+      }
+
+      document.body.removeChild(tempTextArea);
     });
 
     const themeToggle = document.getElementById('themeToggle');
@@ -324,7 +347,6 @@
         ball.x += ball.vx;
         ball.y += ball.vy;
 
-        // Bounce on edges
         if (ball.x <= 0 || ball.x >= window.innerWidth - ball.size) ball.vx *= -1;
         if (ball.y <= 0 || ball.y >= window.innerHeight - ball.size) ball.vy *= -1;
 
