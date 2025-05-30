@@ -24,6 +24,7 @@
     min-height: 100vh;
     transition: background-color 0.3s, color 0.3s;
     position: relative;
+    overflow: hidden;
   }
   body.dark {
     background: var(--bg-dark);
@@ -39,6 +40,7 @@
     text-align: center;
     transition: background-color 0.3s, color 0.3s;
     position: relative;
+    z-index: 10;
   }
   body.dark .container {
     background: #1e1e1e;
@@ -133,9 +135,39 @@
   .theme-toggle:hover {
     background-color: var(--primary-dark);
   }
+  /* Emoji background container */
+  #emoji-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .emoji-ball {
+    position: absolute;
+    font-size: 24px;
+    user-select: none;
+    will-change: transform;
+    animation-name: bounce;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
 </style>
 </head>
 <body>
+  <div id="emoji-background"></div>
+
   <div class="theme-toggle" id="themeToggle" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle Light/Dark Theme">🌙 Dark Mode</div>
 
   <div class="container" role="main" aria-label="Secret message encryptor with emoji output">
@@ -161,6 +193,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <script>
+    // Emoji set for background animation
+    const bgEmojis = ["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😋","😎","😍","😘","😗","😙"];
+
     const emojiSet = [
       "😀","😁","😂","🤣","😃","😄","😅","😆",
       "😉","😊","😋","😎","😍","😘","😗","😙",
@@ -266,6 +301,40 @@
       const isDark = document.body.classList.contains('dark');
       themeToggle.setAttribute('aria-pressed', isDark);
       themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
+
+    // Background emoji animation logic
+    const emojiBgContainer = document.getElementById('emoji-background');
+    const emojiCount = 25;
+    const emojis = [];
+
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function createEmojiBall(index) {
+      const span = document.createElement('span');
+      span.classList.add('emoji-ball');
+      span.style.fontSize = randomBetween(18, 28) + "px";
+      span.textContent = bgEmojis[index % bgEmojis.length];
+      span.style.left = randomBetween(0, window.innerWidth - 30) + "px";
+      span.style.top = randomBetween(0, window.innerHeight - 30) + "px";
+      span.style.animationDuration = randomBetween(3, 7) + "s";
+      span.style.animationDelay = randomBetween(0, 5) + "s";
+      emojiBgContainer.appendChild(span);
+      return span;
+    }
+
+    for(let i = 0; i < emojiCount; i++) {
+      emojis.push(createEmojiBall(i));
+    }
+
+    // Adjust emojis on resize
+    window.addEventListener('resize', () => {
+      emojis.forEach(span => {
+        span.style.left = randomBetween(0, window.innerWidth - 30) + "px";
+        span.style.top = randomBetween(0, window.innerHeight - 30) + "px";
+      });
     });
   </script>
 </body>
