@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Secret Message</title>
+<title>Secret Message with Emoji Output</title>
 <style>
   body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -19,7 +19,7 @@
   }
   .container {
     background: white;
-    max-width: 450px;
+    max-width: 500px;
     width: 100%;
     padding: 30px;
     border-radius: 12px;
@@ -63,10 +63,11 @@
     border-radius: 8px;
     padding: 15px;
     min-height: 80px;
-    font-size: 1.1rem;
+    font-size: 1.3rem;
     white-space: pre-wrap;
     word-wrap: break-word;
     color: #2c3e50;
+    user-select: all;
   }
   footer {
     margin-top: 30px;
@@ -76,7 +77,7 @@
 </style>
 </head>
 <body>
-  <div class="container" role="main" aria-label="Secret message encryptor and decryptor">
+  <div class="container" role="main" aria-label="Secret message encryptor with emoji output">
     <h2>Secret Message</h2>
     <textarea id="message" rows="4" placeholder="Type your message here..."></textarea>
     <input type="password" id="password" placeholder="Enter password" />
@@ -92,6 +93,49 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <script>
+    // Emoji set for base64 encoding (64 emojis)
+    const emojiBase64Chars = [
+      "😀","😁","😂","🤣","😃","😄","😅","😆",
+      "😉","😊","😋","😎","😍","😘","😗","😙",
+      "😚","🙂","🤗","🤔","😐","😑","😶","🙄",
+      "😏","😣","😥","😮","🤐","😯","😪","😫",
+      "😴","😌","😛","😜","😝","🤤","😒","😓",
+      "😔","😕","🙃","🤑","😲","☹️","🙁","😖",
+      "😞","😟","😤","😢","😭","😦","😧","😨",
+      "😩","🤯","😬","😰","😱","🥵","🥶","😳"
+    ];
+
+    // Map base64 chars to emojis
+    const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+    function base64ToEmoji(base64Str) {
+      let result = "";
+      for (let ch of base64Str) {
+        if (ch === "=") {
+          // padding, ignore or use special emoji if needed
+          continue;
+        }
+        const idx = base64Chars.indexOf(ch);
+        if (idx === -1) continue;
+        result += emojiBase64Chars[idx];
+      }
+      return result;
+    }
+
+    function emojiToBase64(emojiStr) {
+      let result = "";
+      for (let ch of emojiStr) {
+        const idx = emojiBase64Chars.indexOf(ch);
+        if (idx === -1) continue;
+        result += base64Chars[idx];
+      }
+      // Base64 string length should be multiple of 4, pad with '='
+      while (result.length % 4 !== 0) {
+        result += "=";
+      }
+      return result;
+    }
+
     function encryptMessage() {
       const msg = document.getElementById('message').value;
       const pwd = document.getElementById('password').value;
@@ -108,7 +152,8 @@
 
       try {
         const encrypted = CryptoJS.AES.encrypt(msg, pwd).toString();
-        output.textContent = encrypted;
+        const emojiEncoded = base64ToEmoji(encrypted);
+        output.textContent = emojiEncoded;
       } catch (e) {
         alert('Encryption failed.');
         output.textContent = '';
@@ -116,12 +161,12 @@
     }
 
     function decryptMessage() {
-      const encrypted = document.getElementById('message').value;
+      const emojiEncrypted = document.getElementById('message').value;
       const pwd = document.getElementById('password').value;
       const output = document.getElementById('output');
 
-      if (!encrypted) {
-        alert('Please enter the encrypted message.');
+      if (!emojiEncrypted) {
+        alert('Please enter the encrypted emoji message.');
         return;
       }
       if (!pwd) {
@@ -130,7 +175,8 @@
       }
 
       try {
-        const bytes = CryptoJS.AES.decrypt(encrypted, pwd);
+        const base64Str = emojiToBase64(emojiEncrypted);
+        const bytes = CryptoJS.AES.decrypt(base64Str, pwd);
         const decrypted = bytes.toString(CryptoJS.enc.Utf8);
         if (!decrypted) {
           alert('Incorrect password or corrupted message.');
