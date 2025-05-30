@@ -52,7 +52,7 @@
     font-weight: 600;
     text-align: left;
   }
-  select, textarea, input[type="password"] {
+  textarea, input[type="password"] {
     width: 100%;
     padding: 10px 12px;
     font-size: 1rem;
@@ -61,7 +61,7 @@
     box-sizing: border-box;
     transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
   }
-  body.dark select, body.dark textarea, body.dark input[type="password"] {
+  body.dark textarea, body.dark input[type="password"] {
     background: #333;
     color: var(--color-dark);
     border-color: #555;
@@ -70,7 +70,7 @@
     resize: vertical;
     min-height: 80px;
   }
-  textarea:focus, input[type="password"]:focus, select:focus {
+  textarea:focus, input[type="password"]:focus {
     border-color: var(--primary-light);
     outline: none;
   }
@@ -114,45 +114,25 @@
   body.dark .footer {
     color: #aaa;
   }
-  .topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  .topbar > * {
-    flex: 1;
-    max-width: 160px;
-  }
   .theme-toggle {
     cursor: pointer;
     text-align: center;
     font-weight: 600;
+    margin-bottom: 20px;
+    user-select: none;
   }
 </style>
 </head>
 <body>
-  <div class="container" role="main" aria-label="Secret message encryptor with emoji output and customization">
-    <div class="topbar">
-      <select id="langSelect" aria-label="Select Language">
-        <option value="en" selected>English</option>
-        <option value="hi">हिन्दी</option>
-        <option value="or">ଓଡ଼ିଆ</option>
-      </select>
-      <select id="emojiSetSelect" aria-label="Select Emoji Set">
-        <option value="default" selected>Default Emoji Set</option>
-        <option value="smiley">Smiley Faces</option>
-        <option value="animals">Animals</option>
-      </select>
-      <div class="theme-toggle" id="themeToggle" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle Light/Dark Theme">🌙 Dark Mode</div>
-    </div>
+  <div class="container" role="main" aria-label="Secret message encryptor with emoji output">
+    <div class="theme-toggle" id="themeToggle" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle Light/Dark Theme">🌙 Dark Mode</div>
 
-    <h2 id="title">Secret Message</h2>
+    <h2>Secret Message</h2>
 
-    <label for="message" id="labelMessage">Message (type or paste here):</label>
+    <label for="message">Message (type or paste here):</label>
     <textarea id="message" placeholder="Type your message here..."></textarea>
 
-    <label for="password" id="labelPassword">Password:</label>
+    <label for="password">Password:</label>
     <input type="password" id="password" placeholder="Enter password" />
 
     <div>
@@ -163,191 +143,82 @@
 
     <div id="output" aria-live="polite" role="region" tabindex="0"></div>
 
-    <div class="footer" id="footerText">Crafted with ❤️ by Gopinath</div>
+    <div class="footer">Crafted with ❤️ by Gopinath</div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <script>
-    const emojiSets = {
-      default: [
-        "😀","😁","😂","🤣","😃","😄","😅","😆",
-        "😉","😊","😋","😎","😍","😘","😗","😙",
-        "😚","🙂","🤗","🤔","😐","😑","😶","🙄",
-        "😏","😣","😥","😮","🤐","😯","😪","😫",
-        "😴","😌","😛","😜","😝","🤤","😒","😓",
-        "😔","😕","🙃","🤑","😲","☹️","🙁","😖",
-        "😞","😟","😤","😢","😭","😦","😧","😨",
-        "😩","🤯","😬","😰","😱","🥵","🥶","😳"
-      ],
-      smiley: [
-        "😀","😃","😄","😁","😆","😅","😂","🤣",
-        "😊","😇","🙂","🙃","😉","😌","😍","🥰",
-        "😘","😗","😙","😚","😋","😛","😝","😜",
-        "🤪","🤨","🧐","🤓","😎","🥳","🤠","😏",
-        "😒","😞","😔","😟","😕","🙁","☹️","😣",
-        "😖","😫","😩","🥺","😢","😭","😤","😠",
-        "😡","🤬","🤯","😳","🥵","🥶","😱","😨"
-      ],
-      animals: [
-        "🐶","🐱","🐭","🐹","🐰","🦊","🐻","🐼",
-        "🐨","🐯","🦁","🐮","🐷","🐸","🐵","🐔",
-        "🐧","🐦","🐤","🐣","🐥","🦆","🦅","🦉",
-        "🦇","🐺","🐗","🐴","🦄","🐝","🐛","🦋",
-        "🐌","🐞","🐜","🦗","🕷️","🦂","🐢","🐍",
-        "🦎","🐙","🦑","🦐","🦀","🐡","🐠","🐟"
-      ]
-    };
+    const emojiSet = [
+      "😀","😁","😂","🤣","😃","😄","😅","😆",
+      "😉","😊","😋","😎","😍","😘","😗","😙",
+      "😚","🙂","🤗","🤔","😐","😑","😶","🙄",
+      "😏","😣","😥","😮","🤐","😯","😪","😫",
+      "😴","😌","😛","😜","😝","🤤","😒","😓",
+      "😔","😕","🙃","🤑","😲","☹️","🙁","😖",
+      "😞","😟","😤","😢","😭","😦","😧","😨",
+      "😩","🤯","😬","😰","😱","🥵","🥶","😳"
+    ];
 
-    const langData = {
-      en: {
-        title: "Secret Message",
-        labelMessage: "Message (type or paste here):",
-        labelPassword: "Password:",
-        encrypt: "Encrypt 🔒",
-        decrypt: "Decrypt 🔓",
-        copy: "Copy Output 📋",
-        crafted: "Crafted with ❤️ by Gopinath",
-        alertNoMessage: "Please enter a message.",
-        alertNoPassword: "Please enter a password.",
-        alertNoEncrypted: "Please enter the encrypted emoji message.",
-        alertIncorrectPassword: "Incorrect password or corrupted message.",
-        alertEncryptionFailed: "Encryption failed.",
-        alertDecryptionFailed: "Decryption failed.",
-        alertCopied: "Output copied to clipboard!"
-      },
-      hi: {
-        title: "सीक्रेट मैसेज",
-        labelMessage: "मैसेज (यहां टाइप या पेस्ट करें):",
-        labelPassword: "पासवर्ड:",
-        encrypt: "एनक्रिप्ट 🔒",
-        decrypt: "डीक्रिप्ट 🔓",
-        copy: "कॉपी आउटपुट 📋",
-        crafted: "दिल से बनाया ❤️ गोपीनाथ द्वारा",
-        alertNoMessage: "कृपया मैसेज दर्ज करें।",
-        alertNoPassword: "कृपया पासवर्ड दर्ज करें।",
-        alertNoEncrypted: "कृपया एन्क्रिप्टेड इमोजी मैसेज दर्ज करें।",
-        alertIncorrectPassword: "गलत पासवर्ड या मैसेज खराब है।",
-        alertEncryptionFailed: "एनक्रिप्शन असफल रहा।",
-        alertDecryptionFailed: "डीक्रिप्शन असफल रहा।",
-        alertCopied: "आउटपुट क्लिपबोर्ड में कॉपी हो गया!"
-      },
-      or: {
-        title: "ସିକ୍ରେଟ୍ ମେସେଜ୍",
-        labelMessage: "ମେସେଜ୍ (ଏଠାରେ ଟାଇପ୍ କରନ୍ତୁ କିମ୍ବା ପେଷ୍ଟ୍ କରନ୍ତୁ):",
-        labelPassword: "ପାସୱାର୍ଡ:",
-        encrypt: "ଇନ୍କ୍ରିପ୍ଟ୍ 🔒",
-        decrypt: "ଡିକ୍ରିପ୍ଟ୍ 🔓",
-        copy: "ନକଲ କରନ୍ତୁ 📋",
-        crafted: "ପ୍ରେମ ସହିତ ତିଆରି ❤️ ଗୋପୀନାଥଙ୍କ ଦ୍ୱାରା",
-        alertNoMessage: "ଦୟାକରି ମେସେଜ୍ ଦିଅନ୍ତୁ।",
-        alertNoPassword: "ଦୟାକରି ପାସୱାର୍ଡ ଦିଅନ୍ତୁ।",
-        alertNoEncrypted: "ଦୟାକରି ଇନ୍କ୍ରିପ୍ଟ୍ ଇମୋଜି ମେସେଜ୍ ଦିଅନ୍ତୁ।",
-        alertIncorrectPassword: "ଭୁଲ ପାସୱାର୍ଡ କିମ୍ବା ମେସେଜ୍ ଖରାପ ଅଟେ।",
-        alertEncryptionFailed: "ଇନ୍କ୍ରିପ୍ସନ୍ ଅସଫଳ ହେଲା।",
-        alertDecryptionFailed: "ଡିକ୍ରିପ୍ସନ୍ ଅସଫଳ ହେଲା।",
-        alertCopied: "ଆଉଟପୁଟ୍ କ୍ଲିପ୍ ବୋର୍ଡକୁ କପି ହୋଇଗଲା!"
-      }
-    };
-
-    let currentLang = 'en';
-    let currentEmojiSet = 'default';
-
-    const messageEl = document.getElementById('message');
-    const passwordEl = document.getElementById('password');
-    const outputEl = document.getElementById('output');
-    const langSelect = document.getElementById('langSelect');
-    const emojiSetSelect = document.getElementById('emojiSetSelect');
-    const themeToggle = document.getElementById('themeToggle');
-
-    function updateLanguage() {
-      const d = langData[currentLang];
-      document.getElementById('title').textContent = d.title;
-      document.getElementById('labelMessage').textContent = d.labelMessage;
-      document.getElementById('labelPassword').textContent = d.labelPassword;
-      document.getElementById('encryptBtn').textContent = d.encrypt;
-      document.getElementById('decryptBtn').textContent = d.decrypt;
-      document.getElementById('copyBtn').textContent = d.copy;
-      document.getElementById('footerText').textContent = d.crafted;
-    }
-
-    langSelect.addEventListener('change', () => {
-      currentLang = langSelect.value;
-      updateLanguage();
-      clearAll();
-    });
-
-    emojiSetSelect.addEventListener('change', () => {
-      currentEmojiSet = emojiSetSelect.value;
-      clearAll();
-    });
-
-    themeToggle.addEventListener('click', () => {
-      document.body.classList.toggle('dark');
-      const isDark = document.body.classList.contains('dark');
-      themeToggle.setAttribute('aria-pressed', isDark);
-      themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
-    });
+    const base64Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     function base64ToEmoji(base64Str) {
-      const emojiChars = emojiSets[currentEmojiSet];
       let result = "";
       for (let ch of base64Str) {
         if (ch === "=") continue;
-        const idx = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".indexOf(ch);
+        const idx = base64Chars.indexOf(ch);
         if (idx === -1) continue;
-        result += emojiChars[idx];
+        result += emojiSet[idx];
       }
       return result;
     }
 
     function emojiToBase64(emojiStr) {
-      const emojiChars = emojiSets[currentEmojiSet];
       let result = "";
       for (let ch of emojiStr) {
-        const idx = emojiChars.indexOf(ch);
+        const idx = emojiSet.indexOf(ch);
         if (idx === -1) continue;
-        result += "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charAt(idx);
+        result += base64Chars.charAt(idx);
       }
       while (result.length % 4 !== 0) result += "=";
       return result;
     }
 
     function encryptMessage() {
-      const msg = messageEl.value;
-      const pwd = passwordEl.value;
-      const d = langData[currentLang];
+      const msg = document.getElementById('message').value;
+      const pwd = document.getElementById('password').value;
+      const output = document.getElementById('output');
 
       if (!msg) {
-        alert(d.alertNoMessage);
+        alert('Please enter a message.');
         return;
       }
       if (!pwd) {
-        alert(d.alertNoPassword);
+        alert('Please enter a password.');
         return;
       }
 
       try {
         const encrypted = CryptoJS.AES.encrypt(msg, pwd).toString();
         const emojiEncoded = base64ToEmoji(encrypted);
-        outputEl.textContent = emojiEncoded;
+        output.textContent = emojiEncoded;
       } catch {
-        alert(d.alertEncryptionFailed);
-        outputEl.textContent = "";
+        alert('Encryption failed.');
+        output.textContent = "";
       }
     }
 
     function decryptMessage() {
-      const emojiEncrypted = messageEl.value;
-      const pwd = passwordEl.value;
-      const d = langData[currentLang];
+      const emojiEncrypted = document.getElementById('message').value;
+      const pwd = document.getElementById('password').value;
+      const output = document.getElementById('output');
 
       if (!emojiEncrypted) {
-        alert(d.alertNoEncrypted);
+        alert('Please enter the encrypted emoji message.');
         return;
       }
       if (!pwd) {
-        alert(d.alertNoPassword);
+        alert('Please enter a password.');
         return;
       }
 
@@ -356,33 +227,34 @@
         const bytes = CryptoJS.AES.decrypt(base64Str, pwd);
         const decrypted = bytes.toString(CryptoJS.enc.Utf8);
         if (!decrypted) {
-          alert(d.alertIncorrectPassword);
-          outputEl.textContent = "";
+          alert('Incorrect password or corrupted message.');
+          output.textContent = "";
         } else {
-          outputEl.textContent = decrypted;
+          output.textContent = decrypted;
         }
       } catch {
-        alert(d.alertDecryptionFailed);
-        outputEl.textContent = "";
+        alert('Decryption failed.');
+        output.textContent = "";
       }
     }
 
     document.getElementById('encryptBtn').addEventListener('click', encryptMessage);
     document.getElementById('decryptBtn').addEventListener('click', decryptMessage);
     document.getElementById('copyBtn').addEventListener('click', () => {
-      if (!outputEl.textContent) return alert(langData[currentLang].alertNoMessage);
+      const outputEl = document.getElementById('output');
+      if (!outputEl.textContent) return alert('Nothing to copy!');
       navigator.clipboard.writeText(outputEl.textContent)
-        .then(() => alert(langData[currentLang].alertCopied))
+        .then(() => alert('Output copied to clipboard!'))
         .catch(() => alert('Clipboard copy failed'));
     });
 
-    function clearAll() {
-      messageEl.value = "";
-      passwordEl.value = "";
-      outputEl.textContent = "";
-    }
-
-    updateLanguage();
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      themeToggle.setAttribute('aria-pressed', isDark);
+      themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+    });
   </script>
 </body>
 </html>
