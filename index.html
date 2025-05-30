@@ -23,6 +23,7 @@
     align-items: center;
     min-height: 100vh;
     transition: background-color 0.3s, color 0.3s;
+    position: relative;
   }
   body.dark {
     background: var(--bg-dark);
@@ -37,6 +38,7 @@
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     text-align: center;
     transition: background-color 0.3s, color 0.3s;
+    position: relative;
   }
   body.dark .container {
     background: #1e1e1e;
@@ -115,18 +117,28 @@
     color: #aaa;
   }
   .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: var(--primary-light);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
     cursor: pointer;
-    text-align: center;
     font-weight: 600;
-    margin-bottom: 20px;
     user-select: none;
+    transition: background-color 0.3s ease;
+    z-index: 1000;
+  }
+  .theme-toggle:hover {
+    background-color: var(--primary-dark);
   }
 </style>
 </head>
 <body>
-  <div class="container" role="main" aria-label="Secret message encryptor with emoji output">
-    <div class="theme-toggle" id="themeToggle" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle Light/Dark Theme">🌙 Dark Mode</div>
+  <div class="theme-toggle" id="themeToggle" tabindex="0" role="button" aria-pressed="false" aria-label="Toggle Light/Dark Theme">🌙 Dark Mode</div>
 
+  <div class="container" role="main" aria-label="Secret message encryptor with emoji output">
     <h2>Secret Message</h2>
 
     <label for="message">Message (type or paste here):</label>
