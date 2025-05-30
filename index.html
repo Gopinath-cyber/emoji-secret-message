@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emoji Secret Message</title>
+</head>
+<body>
+    <h2>Emoji Secret Message Encryptor/Decryptor</h2>
+    
+    <textarea id="message" rows="4" cols="40" placeholder="Yahan apna message likho..."></textarea><br><br>
+    
+    <input type="password" id="password" placeholder="Password daalo"><br><br>
+    
+    <button onclick="encryptMessage()">Encrypt</button>
+    <button onclick="decryptMessage()">Decrypt</button><br><br>
+    
+    <h3>Output:</h3>
+    <div id="output" style="font-size: 24px; white-space: pre-wrap;"></div>
+
+<script>
+    // Emoji list for letters a-z
+    const emojis = ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','😗','😙','😚','🙂','🤗','🤔','😐','😑','😶','🙄','😏'];
+
+    // Encrypt function
+    function encryptMessage() {
+        let msg = document.getElementById('message').value.toLowerCase();
+        let pwd = document.getElementById('password').value;
+        if (!pwd) {
+            alert('Password zaroori hai!');
+            return;
+        }
+        let passSum = 0;
+        for (let ch of pwd) {
+            passSum += ch.charCodeAt(0);
+        }
+        let encrypted = '';
+        for (let ch of msg) {
+            let idx = ch.charCodeAt(0) - 97;
+            if (idx >= 0 && idx < 26) {
+                let shifted = (idx + passSum) % 26;
+                encrypted += emojis[shifted];
+            } else if (ch === ' ') {
+                encrypted += ' ';
+            } else {
+                encrypted += ch;
+            }
+        }
+        document.getElementById('output').innerText = encrypted;
+    }
+
+    // Decrypt function
+    function decryptMessage() {
+        let encrypted = document.getElementById('output').innerText;
+        let pwd = document.getElementById('password').value;
+        if (!pwd) {
+            alert('Password zaroori hai!');
+            return;
+        }
+        let passSum = 0;
+        for (let ch of pwd) {
+            passSum += ch.charCodeAt(0);
+        }
+        let decrypted = '';
+        for (let ch of encrypted) {
+            let idx = emojis.indexOf(ch);
+            if (idx !== -1) {
+                let shifted = (idx - passSum + 26) % 26;
+                decrypted += String.fromCharCode(shifted + 97);
+            } else {
+                decrypted += ch;
+            }
+        }
+        document.getElementById('output').innerText = decrypted;
+    }
+</script>
+</body>
+</html>
