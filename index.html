@@ -3,9 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Secret Message with Bouncing Emoji Background</title>
+<title>Secret Message with Emoji Output</title>
 <style>
-  /* ... (poora pehle wala CSS same rahega) ... */
   :root {
     --bg-light: #f0f4f8;
     --bg-dark: #121212;
@@ -14,48 +13,34 @@
     --primary-light: #3498db;
     --primary-dark: #2980b9;
   }
-  html, body {
-    margin: 0; padding: 0;
-    height: 100%;
-    overflow: hidden;
+  body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--bg-light);
     color: var(--color-light);
+    margin: 0; padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     transition: background-color 0.3s, color 0.3s;
+    position: relative;
+    overflow: hidden;
   }
   body.dark {
     background: var(--bg-dark);
     color: var(--color-dark);
   }
-  #emoji-background {
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    pointer-events: none;
-    overflow: hidden;
-    z-index: 1;
-    background: transparent;
-  }
-  .emoji-ball {
-    position: absolute;
-    font-size: 28px;
-    user-select: none;
-    will-change: transform, left, top;
-  }
   .container {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 10;
     background: white;
     max-width: 520px;
-    width: 90vw;
+    width: 100%;
     padding: 30px;
     border-radius: 12px;
     box-shadow: 0 10px 20px rgba(0,0,0,0.1);
     text-align: center;
     transition: background-color 0.3s, color 0.3s;
+    position: relative;
+    z-index: 10;
   }
   body.dark .container {
     background: #1e1e1e;
@@ -87,9 +72,7 @@
   }
   textarea {
     resize: vertical;
-    min-height: 140px;
-    max-height: 300px;
-    overflow-y: auto;
+    min-height: 80px;
   }
   textarea:focus, input[type="password"]:focus {
     border-color: var(--primary-light);
@@ -115,14 +98,12 @@
     border-radius: 8px;
     padding: 15px;
     min-height: 80px;
-    max-height: 180px;
     font-size: 1.3rem;
     white-space: pre-wrap;
     word-wrap: break-word;
     color: #2c3e50;
     user-select: all;
     margin-top: 10px;
-    overflow-y: auto;
   }
   body.dark #output {
     background-color: #2c2c2c;
@@ -154,6 +135,34 @@
   .theme-toggle:hover {
     background-color: var(--primary-dark);
   }
+  /* Emoji background container */
+  #emoji-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+  }
+  .emoji-ball {
+    position: absolute;
+    font-size: 24px;
+    user-select: none;
+    will-change: transform;
+    animation-name: bounce;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+  @keyframes bounce {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
 </style>
 </head>
 <body>
@@ -165,7 +174,7 @@
     <h2>Secret Message</h2>
 
     <label for="message">Message (type or paste here):</label>
-    <textarea id="message" placeholder="Type your message here..." maxlength="5000" rows="8"></textarea>
+    <textarea id="message" placeholder="Type your message here..."></textarea>
 
     <label for="password">Password:</label>
     <input type="password" id="password" placeholder="Enter password" />
@@ -184,6 +193,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
   <script>
+    // Emoji set for background animation
+    const bgEmojis = ["😀","😁","😂","🤣","😃","😄","😅","😆","😉","😊","😋","😎","😍","😘","😗","😙"];
+
     const emojiSet = [
       "😀","😁","😂","🤣","😃","😄","😅","😆",
       "😉","😊","😋","😎","😍","😘","😗","😙",
@@ -275,34 +287,12 @@
 
     document.getElementById('encryptBtn').addEventListener('click', encryptMessage);
     document.getElementById('decryptBtn').addEventListener('click', decryptMessage);
-
-    // Improved copy function with temporary textarea
     document.getElementById('copyBtn').addEventListener('click', () => {
       const outputEl = document.getElementById('output');
-      const textToCopy = outputEl.textContent;
-      if (!textToCopy) {
-        alert('Nothing to copy!');
-        return;
-      }
-
-      const tempTextArea = document.createElement('textarea');
-      tempTextArea.value = textToCopy;
-      document.body.appendChild(tempTextArea);
-      tempTextArea.select();
-      tempTextArea.setSelectionRange(0, 99999); // For mobile devices
-
-      try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-          alert('Output copied to clipboard!');
-        } else {
-          alert('Copy failed, please try manually.');
-        }
-      } catch (err) {
-        alert('Copy failed, please try manually.');
-      }
-
-      document.body.removeChild(tempTextArea);
+      if (!outputEl.textContent) return alert('Nothing to copy!');
+      navigator.clipboard.writeText(outputEl.textContent)
+        .then(() => alert('Output copied to clipboard!'))
+        .catch(() => alert('Clipboard copy failed'));
     });
 
     const themeToggle = document.getElementById('themeToggle');
@@ -313,56 +303,37 @@
       themeToggle.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
     });
 
-    // Emoji ball bouncing background animation
+    // Background emoji animation logic
     const emojiBgContainer = document.getElementById('emoji-background');
-    const emojiBallsCount = 30;
-    const emojiBalls = [];
+    const emojiCount = 25;
+    const emojis = [];
 
     function randomBetween(min, max) {
       return Math.random() * (max - min) + min;
     }
 
-    function createEmojiBall() {
+    function createEmojiBall(index) {
       const span = document.createElement('span');
       span.classList.add('emoji-ball');
-      span.textContent = emojiSet[Math.floor(randomBetween(0, emojiSet.length))];
+      span.style.fontSize = randomBetween(18, 28) + "px";
+      span.textContent = bgEmojis[index % bgEmojis.length];
+      span.style.left = randomBetween(0, window.innerWidth - 30) + "px";
+      span.style.top = randomBetween(0, window.innerHeight - 30) + "px";
+      span.style.animationDuration = randomBetween(3, 7) + "s";
+      span.style.animationDelay = randomBetween(0, 5) + "s";
       emojiBgContainer.appendChild(span);
-
-      return {
-        el: span,
-        x: randomBetween(0, window.innerWidth - 30),
-        y: randomBetween(0, window.innerHeight - 30),
-        vx: randomBetween(-1.5, 1.5),
-        vy: randomBetween(-1.5, 1.5),
-        size: randomBetween(22, 32)
-      };
+      return span;
     }
 
-    for (let i = 0; i < emojiBallsCount; i++) {
-      emojiBalls.push(createEmojiBall());
+    for(let i = 0; i < emojiCount; i++) {
+      emojis.push(createEmojiBall(i));
     }
 
-    function animate() {
-      emojiBalls.forEach(ball => {
-        ball.x += ball.vx;
-        ball.y += ball.vy;
-
-        if (ball.x <= 0 || ball.x >= window.innerWidth - ball.size) ball.vx *= -1;
-        if (ball.y <= 0 || ball.y >= window.innerHeight - ball.size) ball.vy *= -1;
-
-        ball.el.style.left = ball.x + 'px';
-        ball.el.style.top = ball.y + 'px';
-        ball.el.style.fontSize = ball.size + 'px';
-      });
-      requestAnimationFrame(animate);
-    }
-
-    animate();
-
+    // Adjust emojis on resize
     window.addEventListener('resize', () => {
-      emojiBalls.forEach(ball => {
-        ball.x = Math.min(ball.x, window.innerWidth - ball.size);
-        ball.y = Math.min(ball.y, window.innerHeight - ball.size);
+      emojis.forEach(span => {
+        span.style.left = randomBetween(0, window.innerWidth - 30) + "px";
+        span.style.top = randomBetween(0, window.innerHeight - 30) + "px";
       });
     });
   </script>
