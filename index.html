@@ -224,16 +224,17 @@
     for (const ch of msg) {
       const code = ch.charCodeAt(0);
       if (code >= 97 && code <= 122) {
+        // letter a-z
         const idx = code - 97;
         const shiftedIdx = (idx + shift) % 26;
         encrypted += emojis[shiftedIdx];
       } else if (code >= 48 && code <= 57) {
+        // number 0-9
         const numIdx = code - 48;
         const shiftedNumIdx = (numIdx + shift) % 10;
         encrypted += numberEmojis[shiftedNumIdx];
-      } else if (ch === ' ') {
-        encrypted += ' ';
       } else {
+        // spaces, punctuation, special chars waise hi add karo
         encrypted += ch;
       }
     }
@@ -253,8 +254,9 @@
     }
     const shift = calculateShift(pwd);
     let decrypted = '';
-    for (let i = 0; i < encrypted.length; i++) {
-      const ch = encrypted[i];
+    const chars = Array.from(encrypted); // Correctly handle multi-char emojis
+    for (let i = 0; i < chars.length; i++) {
+      const ch = chars[i];
       if (emojis.includes(ch)) {
         const idx = emojis.indexOf(ch);
         const shiftedIdx = (idx - shift + 26) % 26;
@@ -263,8 +265,6 @@
         const idx = numberEmojis.indexOf(ch);
         const shiftedIdx = (idx - shift + 10) % 10;
         decrypted += shiftedIdx.toString();
-      } else if (ch === ' ') {
-        decrypted += ' ';
       } else {
         decrypted += ch;
       }
