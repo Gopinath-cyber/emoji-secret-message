@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Gopinath Secret Message</title>
+<title>Secret Message</title>
 <style>
     /* Basic reset */
     * {
@@ -14,6 +14,7 @@
         background: #f0f4f8;
         color: #333;
         display: flex;
+        flex-direction: column;
         justify-content: center;
         align-items: center;
         min-height: 100vh;
@@ -156,12 +157,21 @@
             width: 100%;
         }
     }
+    footer {
+        margin-top: 15px;
+        font-size: 0.9rem;
+        color: #666;
+        user-select: none;
+    }
+    body.dark footer {
+        color: #aaa;
+    }
 </style>
 </head>
 <body>
     <div class="container" role="main" aria-label="Emoji secret message app">
         <div class="top-bar">
-            <h2>Gopinath Secret Message</h2>
+            <h2>Secret Message</h2>
             <button id="darkToggle" aria-pressed="false" aria-label="Toggle dark mode">🌙 Dark Mode</button>
         </div>
         
@@ -181,8 +191,11 @@
         <button id="copyBtn" style="margin-top: 10px;">Copy Output 📋</button>
     </div>
 
+    <footer>Crafted with ❤️ by Gopinath</footer>
+
 <script>
     const emojis = ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','😗','😙','😚','🙂','🤗','🤔','😐','😑','😶','🙄','😏'];
+    const numberEmojis = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣'];
 
     function calculateShift(pwd) {
         let sum = 0;
@@ -214,12 +227,20 @@
         for (const ch of msg) {
             const code = ch.charCodeAt(0);
             if (code >= 97 && code <= 122) {
+                // letter a-z
                 const idx = code - 97;
                 const shiftedIdx = (idx + shift) % 26;
                 encrypted += emojis[shiftedIdx];
+            } else if (code >= 48 && code <= 57) {
+                // number 0-9
+                const numIdx = code - 48;
+                // shift numbers separately with mod 10 so shift won't mix alphabets and numbers
+                const shiftedNumIdx = (numIdx + shift) % 10;
+                encrypted += numberEmojis[shiftedNumIdx];
             } else if (ch === ' ') {
                 encrypted += ' ';
             } else {
+                // other characters stay same
                 encrypted += ch;
             }
         }
@@ -239,11 +260,18 @@
         }
         const shift = calculateShift(pwd);
         let decrypted = '';
-        for (const ch of encrypted) {
-            const idx = emojis.indexOf(ch);
-            if (idx !== -1) {
+        for (let i = 0; i < encrypted.length; i++) {
+            const ch = encrypted[i];
+            if (emojis.includes(ch)) {
+                const idx = emojis.indexOf(ch);
                 const shiftedIdx = (idx - shift + 26) % 26;
                 decrypted += String.fromCharCode(shiftedIdx + 97);
+            } else if (numberEmojis.includes(ch)) {
+                const idx = numberEmojis.indexOf(ch);
+                const shiftedIdx = (idx - shift + 10) % 10;
+                decrypted += shiftedIdx.toString();
+            } else if (ch === ' ') {
+                decrypted += ' ';
             } else {
                 decrypted += ch;
             }
