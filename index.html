@@ -5,306 +5,295 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Secret Message</title>
 <style>
-    /* Basic reset */
-    * {
-        box-sizing: border-box;
-    }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f0f4f8;
-        color: #333;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        min-height: 100vh;
-        margin: 0;
-        padding: 20px;
-        transition: background-color 0.3s, color 0.3s;
-    }
-    body.dark {
-        background: #121212;
-        color: #eee;
-    }
+  /* Reset and base styles */
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+    position: relative;
+  }
+  body.dark {
+    background: #121212;
+    color: #eee;
+  }
+  /* Dark mode toggle fixed at top-right of viewport */
+  #darkToggle {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    background-color: #888;
+    border-radius: 8px;
+    cursor: pointer;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    z-index: 1000;
+  }
+  #darkToggle:hover {
+    background-color: #555;
+  }
+  .container {
+    background: white;
+    max-width: 450px;
+    width: 100%;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: background-color 0.3s, color 0.3s;
+    margin-top: 0;
+  }
+  body.dark .container {
+    background: #1e1e1e;
+    color: #eee;
+    box-shadow: 0 10px 20px rgba(255,255,255,0.1);
+  }
+  h2 {
+    margin-bottom: 20px;
+    color: #2c3e50;
+    margin: 0;
+    font-weight: 700;
+    font-size: 1.8rem;
+  }
+  body.dark h2 {
+    color: #ddd;
+  }
+  textarea, input[type="password"] {
+    width: 100%;
+    padding: 12px 15px;
+    margin: 10px 0 20px 0;
+    border: 1.5px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, background-color 0.3s, color 0.3s;
+    resize: vertical;
+    background: white;
+    color: #333;
+  }
+  body.dark textarea, body.dark input[type="password"] {
+    background: #333;
+    color: #eee;
+    border-color: #555;
+  }
+  textarea:focus, input[type="password"]:focus {
+    border-color: #3498db;
+    outline: none;
+  }
+  button {
+    background-color: #3498db;
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    margin: 10px 10px 20px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
+    box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
+    user-select: none;
+  }
+  button:hover {
+    background-color: #2980b9;
+    box-shadow: 0 6px 12px rgba(41, 128, 185, 0.5);
+  }
+  button:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 5px rgba(41, 128, 185, 0.7);
+  }
+  #output {
+    background-color: #ecf0f1;
+    border-radius: 8px;
+    padding: 15px;
+    min-height: 70px;
+    font-size: 1.25rem;
+    word-wrap: break-word;
+    user-select: all;
+    margin-top: 10px;
+    white-space: pre-wrap;
+    color: #2c3e50;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  #output.visible {
+    opacity: 1;
+  }
+  body.dark #output {
+    background-color: #2c2c2c;
+    color: #eee;
+  }
+  label {
+    font-weight: 600;
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+    color: #34495e;
+  }
+  body.dark label {
+    color: #bbb;
+  }
+  footer {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #666;
+    user-select: none;
+    font-style: italic;
+  }
+  body.dark footer {
+    color: #aaa;
+  }
+  @media (max-width: 480px) {
     .container {
-        background: white;
-        max-width: 450px;
-        width: 100%;
-        padding: 25px 30px;
-        border-radius: 12px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        text-align: center;
-        transition: background-color 0.3s, color 0.3s;
-        position: relative;
-    }
-    body.dark .container {
-        background: #1e1e1e;
-        color: #eee;
-        box-shadow: 0 10px 20px rgba(255,255,255,0.1);
-    }
-    h2 {
-        margin-bottom: 20px;
-        color: #2c3e50;
-        margin: 0;
-        font-weight: 700;
-    }
-    body.dark h2 {
-        color: #ddd;
-    }
-    textarea, input[type="password"] {
-        width: 100%;
-        padding: 12px 15px;
-        margin: 10px 0 20px 0;
-        border: 1.5px solid #ccc;
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: border-color 0.3s ease, background-color 0.3s, color 0.3s;
-        resize: vertical;
-        background: white;
-        color: #333;
-    }
-    body.dark textarea, body.dark input[type="password"] {
-        background: #333;
-        color: #eee;
-        border-color: #555;
-    }
-    textarea:focus, input[type="password"]:focus {
-        border-color: #3498db;
-        outline: none;
+      padding: 20px 15px;
     }
     button {
-        background-color: #3498db;
-        border: none;
-        color: white;
-        padding: 12px 25px;
-        margin: 10px 10px 20px 10px;
-        border-radius: 8px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.1s ease;
-        box-shadow: 0 4px 8px rgba(52, 152, 219, 0.3);
-        user-select: none;
+      width: 100%;
+      margin: 10px 0 20px 0;
     }
-    button:hover {
-        background-color: #2980b9;
-        box-shadow: 0 6px 12px rgba(41, 128, 185, 0.5);
-    }
-    button:active {
-        transform: scale(0.95);
-        box-shadow: 0 2px 5px rgba(41, 128, 185, 0.7);
-    }
-    #output {
-        background-color: #ecf0f1;
-        border-radius: 8px;
-        padding: 15px;
-        min-height: 70px;
-        font-size: 1.25rem;
-        word-wrap: break-word;
-        user-select: all;
-        margin-top: 10px;
-        white-space: pre-wrap;
-        color: #2c3e50;
-        opacity: 0;
-        transition: opacity 0.5s ease;
-    }
-    #output.visible {
-        opacity: 1;
-    }
-    body.dark #output {
-        background-color: #2c2c2c;
-        color: #eee;
-    }
-    label {
-        font-weight: 600;
-        display: block;
-        text-align: left;
-        margin-bottom: 5px;
-        color: #34495e;
-    }
-    body.dark label {
-        color: #bbb;
-    }
-    /* Top bar styles */
-    .top-bar {
-        display: flex;
-        justify-content: center; /* Center the heading */
-        align-items: center;
-        position: relative;
-        margin-bottom: 15px;
-    }
-    #darkToggle {
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        margin: 0;
-        padding: 8px 15px;
-        font-size: 0.9rem;
-        box-shadow: none;
-        background-color: #888;
-        transition: background-color 0.3s ease;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-    #darkToggle:hover {
-        background-color: #555;
-    }
-    @media (max-width: 480px) {
-        .container {
-            padding: 20px 15px;
-        }
-        button {
-            width: 100%;
-            margin: 10px 0 20px 0;
-        }
-        .top-bar {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        #darkToggle {
-            position: static;
-            transform: none;
-            width: 100%;
-            margin-top: 10px;
-        }
-    }
-    footer {
-        margin-top: 15px;
-        font-size: 0.9rem;
-        color: #666;
-        user-select: none;
-    }
-    body.dark footer {
-        color: #aaa;
-    }
+  }
 </style>
 </head>
 <body>
-    <div class="container" role="main" aria-label="Emoji secret message app">
-        <div class="top-bar">
-            <h2>Secret Message</h2>
-            <button id="darkToggle" aria-pressed="false" aria-label="Toggle dark mode">🌙 Dark Mode</button>
-        </div>
-        
-        <label for="message">Message (type or paste here):</label>
-        <textarea id="message" rows="4" placeholder="Apna message yahan likho ya encrypted emoji yahan paste karo..."></textarea>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" placeholder="Password daalo" aria-describedby="pwdHelp" />
-        
-        <div>
-            <button onclick="encryptMessage()">Encrypt 🔒</button>
-            <button onclick="decryptMessage()">Decrypt 🔓</button>
-        </div>
-        
-        <label for="output">Output:</label>
-        <div id="output" tabindex="0" aria-live="polite" role="region"></div>
-        <button id="copyBtn" style="margin-top: 10px;">Copy Output 📋</button>
+  <button id="darkToggle" aria-pressed="false" aria-label="Toggle dark mode">🌙 Dark Mode</button>
+
+  <div class="container" role="main" aria-label="Secret message app">
+    <h2>Secret Message</h2>
+
+    <label for="message">Message (type or paste here):</label>
+    <textarea id="message" rows="4" placeholder="Apna message yahan likho ya encrypted emoji yahan paste karo..."></textarea>
+
+    <label for="password">Password:</label>
+    <input type="password" id="password" placeholder="Password daalo" aria-describedby="pwdHelp" />
+
+    <div>
+      <button onclick="encryptMessage()">Encrypt 🔒</button>
+      <button onclick="decryptMessage()">Decrypt 🔓</button>
     </div>
 
-    <footer>Crafted with ❤️ by Gopinath</footer>
+    <label for="output">Output:</label>
+    <div id="output" tabindex="0" aria-live="polite" role="region"></div>
+    <button id="copyBtn" style="margin-top: 10px;">Copy Output 📋</button>
+  </div>
+
+  <footer>Crafted with ❤️ by Gopinath</footer>
 
 <script>
-    const emojis = ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','😗','😙','😚','🙂','🤗','🤔','😐','😑','😶','🙄','😏'];
-    const numberEmojis = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣'];
+  const emojis = ['😀','😁','😂','🤣','😃','😄','😅','😆','😉','😊','😋','😎','😍','😘','😗','😙','😚','🙂','🤗','🤔','😐','😑','😶','🙄','😏'];
+  const numberEmojis = ['0️⃣','1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣'];
 
-    function calculateShift(pwd) {
-        let sum = 0;
-        for (let i = 0; i < pwd.length; i++) {
-            sum += pwd.charCodeAt(i);
-        }
-        return sum % 26;
+  function calculateShift(pwd) {
+    let sum = 0;
+    for (let i = 0; i < pwd.length; i++) {
+      sum += pwd.charCodeAt(i);
     }
+    return sum % 26;
+  }
 
-    function showOutput(text) {
-        const output = document.getElementById('output');
-        output.textContent = text;
-        output.classList.add('visible');
+  function showOutput(text) {
+    const output = document.getElementById('output');
+    output.textContent = text;
+    output.classList.add('visible');
+  }
+
+  function encryptMessage() {
+    const msg = document.getElementById('message').value.toLowerCase();
+    const pwd = document.getElementById('password').value.trim();
+    if (!pwd) {
+      alert('Password zaroori hai!');
+      return;
     }
-
-    function encryptMessage() {
-        const msg = document.getElementById('message').value.toLowerCase();
-        const pwd = document.getElementById('password').value;
-        if (!pwd) {
-            alert('Password zaroori hai!');
-            return;
-        }
-        if (!msg) {
-            alert('Message likho!');
-            return;
-        }
-        const shift = calculateShift(pwd);
-        let encrypted = '';
-        for (const ch of msg) {
-            const code = ch.charCodeAt(0);
-            if (code >= 97 && code <= 122) {
-                // letter a-z
-                const idx = code - 97;
-                const shiftedIdx = (idx + shift) % 26;
-                encrypted += emojis[shiftedIdx];
-            } else if (code >= 48 && code <= 57) {
-                // number 0-9
-                const numIdx = code - 48;
-                const shiftedNumIdx = (numIdx + shift) % 10;
-                encrypted += numberEmojis[shiftedNumIdx];
-            } else if (ch === ' ') {
-                encrypted += ' ';
-            } else {
-                // other characters stay same
-                encrypted += ch;
-            }
-        }
-        showOutput(encrypted);
+    if (!msg) {
+      alert('Message likho!');
+      return;
     }
-
-    function decryptMessage() {
-        const encrypted = document.getElementById('message').value;
-        const pwd = document.getElementById('password').value;
-        if (!pwd) {
-            alert('Password zaroori hai!');
-            return;
-        }
-        if (!encrypted) {
-            alert('Emoji message paste karo!');
-            return;
-        }
-        const shift = calculateShift(pwd);
-        let decrypted = '';
-        for (let i = 0; i < encrypted.length; i++) {
-            const ch = encrypted[i];
-            if (emojis.includes(ch)) {
-                const idx = emojis.indexOf(ch);
-                const shiftedIdx = (idx - shift + 26) % 26;
-                decrypted += String.fromCharCode(shiftedIdx + 97);
-            } else if (numberEmojis.includes(ch)) {
-                const idx = numberEmojis.indexOf(ch);
-                const shiftedIdx = (idx - shift + 10) % 10;
-                decrypted += shiftedIdx.toString();
-            } else if (ch === ' ') {
-                decrypted += ' ';
-            } else {
-                decrypted += ch;
-            }
-        }
-        showOutput(decrypted);
+    const shift = calculateShift(pwd);
+    let encrypted = '';
+    for (const ch of msg) {
+      const code = ch.charCodeAt(0);
+      if (code >= 97 && code <= 122) {
+        const idx = code - 97;
+        const shiftedIdx = (idx + shift) % 26;
+        encrypted += emojis[shiftedIdx];
+      } else if (code >= 48 && code <= 57) {
+        const numIdx = code - 48;
+        const shiftedNumIdx = (numIdx + shift) % 10;
+        encrypted += numberEmojis[shiftedNumIdx];
+      } else if (ch === ' ') {
+        encrypted += ' ';
+      } else {
+        encrypted += ch;
+      }
     }
+    showOutput(encrypted);
+  }
 
-    // Copy output to clipboard
-    document.getElementById('copyBtn').addEventListener('click', () => {
-        const outputText = document.getElementById('output').textContent;
-        if (!outputText) {
-            alert('Copy karne ke liye pehle output generate karo!');
-            return;
-        }
-        navigator.clipboard.writeText(outputText).then(() => {
-            alert('Output clipboard me copy ho gaya!');
-        }).catch(() => {
-            alert('Clipboard copy failed. Aap manually copy karein.');
-        });
+  function decryptMessage() {
+    const encrypted = document.getElementById('message').value;
+    const pwd = document.getElementById('password').value.trim();
+    if (!pwd) {
+      alert('Password zaroori hai!');
+      return;
+    }
+    if (!encrypted) {
+      alert('Emoji message paste karo!');
+      return;
+    }
+    const shift = calculateShift(pwd);
+    let decrypted = '';
+    for (let i = 0; i < encrypted.length; i++) {
+      const ch = encrypted[i];
+      if (emojis.includes(ch)) {
+        const idx = emojis.indexOf(ch);
+        const shiftedIdx = (idx - shift + 26) % 26;
+        decrypted += String.fromCharCode(shiftedIdx + 97);
+      } else if (numberEmojis.includes(ch)) {
+        const idx = numberEmojis.indexOf(ch);
+        const shiftedIdx = (idx - shift + 10) % 10;
+        decrypted += shiftedIdx.toString();
+      } else if (ch === ' ') {
+        decrypted += ' ';
+      } else {
+        decrypted += ch;
+      }
+    }
+    showOutput(decrypted);
+  }
+
+  // Copy output to clipboard
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const outputText = document.getElementById('output').textContent;
+    if (!outputText) {
+      alert('Copy karne ke liye pehle output generate karo!');
+      return;
+    }
+    navigator.clipboard.writeText(outputText).then(() => {
+      alert('Output clipboard me copy ho gaya!');
+    }).catch(() => {
+      alert('Clipboard copy failed. Aap manually copy karein.');
     });
+  });
 
-    // Dark mode toggle
-    const darkToggleBtn = document.getElementById('darkToggle');
-    darkToggleBtn.addEventListener('click', () => {
-        document.body.classList.toggle('dark');
-        const isDark = docume
+  // Dark mode toggle
+  const darkToggleBtn = document.getElementById('darkToggle');
+  darkToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+    const isDark = document.body.classList.contains('dark');
+    darkToggleBtn.setAttribute('aria-pressed', isDark);
+    darkToggleBtn.textContent = isDark ? '☀️ Light Mode' : '🌙 Dark Mode';
+  });
+</script>
+</body>
+</html>
